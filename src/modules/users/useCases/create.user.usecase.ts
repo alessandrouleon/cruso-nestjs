@@ -1,9 +1,21 @@
-interface CreateUserDTO {
-  name: string;
-  username: string;
-  email: string;
-  password: string;
-}
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "src/infra/database/prisma.service";
+import { CreateUserDTO } from "../dto/create.user.dto";
+
+
+@Injectable()
 export class CreateUserUseCase {
-  async execute(data: CreateUserDTO) {}
+  constructor(private prisma: PrismaService) { }
+
+  async execute(data: CreateUserDTO) {
+    const user = await this.prisma.users.findFirst({
+      where: {
+        OR: [{ username: data.username }, { email: data.email }]
+      }
+    });
+    if (user) {
+      throw new Error('User already exists!')
+    }
+    return await this.prisma.users.create({ data })
+  }
 }

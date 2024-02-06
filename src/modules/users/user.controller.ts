@@ -1,21 +1,17 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { CreateUserDTO } from './dto/create.user.dto';
+import { CreateUserUseCase } from './useCases/create.user.usecase';
 
-interface BodyUser {
-  username: string;
-  email: string;
-  password: string;
-}
 
 @Controller('users')
 export class UserController {
-  @Post('/create')
-  create(@Body() data: BodyUser) {
-    return {
-      ...data,
-      id: randomUUID(),
-    };
+  constructor(private readonly createUserUseCase: CreateUserUseCase){}
+
+  @Post()
+  async create(@Body() data: CreateUserDTO) {
+   return await this.createUserUseCase.execute(data)
   }
+
   @Get()
   findListAll(): string {
     return 'List all Users';
